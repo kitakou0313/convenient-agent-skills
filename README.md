@@ -3,6 +3,9 @@
 
 ## Skills
 <!-- SKILLS:LIST:START -->
+### architecture-map
+対象コードベースの構造を、依存関係の簡易マップと、機能（エントリーポイント）ごとのデータフロー図（クラス/構造体間でやりとりされるデータの型と責務）としてインタラクティブなHTMLで可視化する。Java/Go/Node.jsは標準ツールで補強し、他言語はAIの読解でフォールバックする。「このコードベースのアーキテクチャを教えて」「アーキテクチャを可視化して」「このリポジトリの構造を理解したい」「このソフトウェアの構造を把握したい」といった依頼で使用する。
+
 ### boiled-me
 文書全体を意味を落とさずに要約・凝縮する。論証構造を持つ箇所は内部的に論証図（従属前提・独立前提・中間結論）を構築して支持関係を壊さない圧縮かどうかを検証し、手順・時系列・箇条書きなど論証構造を持たない箇所は重複排除を手がかりに原文の順序を保ったまま圧縮する。圧縮方針をユーザーと確認しながら短文の連なりに仕上げ、元の文章に反映する。「文章を要約して」「文章を短くして」「長い文章を凝縮して」「手順書を簡潔にして」といった依頼で使用する。
 
@@ -36,6 +39,7 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --list
 
 <!-- SKILLS:CODE:START -->
 ```
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill architecture-map
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiled-me
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill check-lts
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill grounded-report
@@ -55,6 +59,7 @@ Claude Desktopへのアップロードを行うAPI/CLIは提供されていな�
     <!-- SKILLS:DESKTOP:START -->
     ```
     cd skills
+    zip -r architecture-map.zip architecture-map
     zip -r boiled-me.zip boiled-me
     zip -r check-lts.zip check-lts
     zip -r grounded-report.zip grounded-report
