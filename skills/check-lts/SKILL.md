@@ -2,7 +2,6 @@
 name: check-lts
 description: Check LTS support status for Go, Node.js, Java, Python, and PHP by fetching official release pages. Use when asked about LTS versions, support lifecycle, or EOL dates for these languages.
 compatibility: Requires internet access to fetch official release pages
-allowed-tools: WebFetch
 ---
 
 # Check LTS Support Status
@@ -11,9 +10,9 @@ Go、Node.js、Java、Python、PHPのLTSサポート状況を公式サイトか�
 
 ## 手順
 
-以下の5つの公式URLをそれぞれWebFetchで取得し、サポート状況をまとめてください。
-5つのフェッチは並列で実行してください。
-WebFetchでの取得に失敗した場合、以下のメッセージを出力してください。
+以下の5つの公式URLをそれぞれWebページ取得機能で取得し、サポート状況をまとめてください。
+5つの取得は並列で実行してください。
+取得に失敗した場合、以下のメッセージを出力してください。
 ```
 {指定された言語}でのサポート状況の取得に失敗しました。
 ```

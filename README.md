@@ -94,3 +94,6 @@ bash scripts/install-hooks.sh
     - どんなことが演繹的に言えるか
 - ソフトウェアの構造、依存関係などを一眼で理解できるskillsの作成
     - CIで実行したいので全文の読み込みなどは行わないようにする
+- skills作成時の方針をCLAUDE.mdにまとめる
+    - Claude Codeに依存しない
+        - 組み込みのskillsに依存しない
