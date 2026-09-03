@@ -23,6 +23,9 @@ Interview the user to build an autonomous execute-verify loop for a task — gat
 
 ### slack-canvas-comment-threads
 SlackのCanvas URLを渡すと、そのCanvasに付けられたコメント（Canvasネイティブの注釈コメント。通常のチャンネルスレッドとは別物だが、実体はfile conversation上のメッセージ/スレッドとして保持されている）を網羅的に洗い出し、網羅性を検証した上でリンクと内容の要約をユーザーに提示する。「CanvasのコメントをまとめてSlack Canvasのコメントスレッドを取得して」「このCanvasについたコメントを全部見せて」といった依頼で使用する。
+
+### test-logic-audit
+対象のテストコードを論理学的アプローチで監査し、(1)各テストが何を検証しているか、(2)仕様条件に対する網羅性、(3)テスト（前提）からコードの性質について演繹的に何が言えるか、を明らかにする。テストの前提を論証地図（独立前提・従属前提・中間結論）として構造化し、弱いアサーションやトートロジー的なテストも検出する。不足しているテストケースの提案まで行うが、テストコードの自動生成は行わない。「このテストの品質を検証して」「テストの網羅性を確認して」「このテストから何が演繹的に言えるか教えて」「テストをレビューして」「このテストは十分か」といった依頼で使用する。
 <!-- SKILLS:LIST:END -->
 
 ## How to install
@@ -46,6 +49,7 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill gr
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill masked-software-modeling
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill setup-loop
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill slack-canvas-comment-threads
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill test-logic-audit
 ```
 <!-- SKILLS:CODE:END -->
 
@@ -66,6 +70,7 @@ Claude Desktopへのアップロードを行うAPI/CLIは提供されていな�
     zip -r masked-software-modeling.zip masked-software-modeling
     zip -r setup-loop.zip setup-loop
     zip -r slack-canvas-comment-threads.zip slack-canvas-comment-threads
+    zip -r test-logic-audit.zip test-logic-audit
     ```
     <!-- SKILLS:DESKTOP:END -->
 
@@ -88,10 +93,7 @@ bash scripts/install-hooks.sh
 ## ToDo
 - AIで生成された文章を煎じ詰めて短くするskills
     - 論理構造の分析に引っ張られすぎて手順書などの要約に適用できない
-- テストの品質検証
-    - どんなテストを行っているか
-    - 網羅性を満たしているか
-    - どんなことが演繹的に言えるか
+- skillsのテストを行うskills
 - ソフトウェアの構造、依存関係などを一眼で理解できるskillsの作成
     - CIで実行したいので全文の読み込みなどは行わないようにする
 - skills作成時の方針をCLAUDE.mdにまとめる
