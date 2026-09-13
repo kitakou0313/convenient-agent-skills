@@ -15,6 +15,9 @@ Check LTS support status for Go, Node.js, Java, Python, and PHP by fetching offi
 ### grounded-report
 ユーザーが指定した目的を満たす、根拠資料に基づいたHTMLレポートを生成する。対象読者の前提知識に応じた用語の先出し定義、目的達成度、論理構成の妥当性、引用の有無、引用元との整合性の5点を、実装文脈を持たない独立した検証者が自動検証し、実行→検証→修正のループで基準を満たすまで自律的に改善する。「レポートを作って」「根拠付きのレポートが欲しい」「調べてレポートにまとめて」といった依頼で使用する。
 
+### invest-task-splitter
+渡された要件を、INVESTの原則（独立している・交渉可能・価値がある・見積もれる・小さい・テスト可能）を満たす形で複数のサブタスクに分割する。分割案をユーザーに提示する前に、実装文脈を持たない独立した検証者がINVESTの充足と全体の網羅性を自動検証し、不合格の場合は該当タスクのみ修正して再検証するループを回す。さらに各タスクを「他者への依頼/他タスクのブロック」「見積もり困難・後続の方針に影響する調査等」「内容が明確で高精度に見積もれる」の3段階に分類し、着手優先度として提示する。「要件をタスクに分割して」「INVESTを満たす形でタスクに分けて」「サブタスクに落として」といった依頼で使用する。
+
 ### masked-software-modeling
 指定したソフトウェアの一部のロジックを削除（マスク）し、ユーザー自身に再実装させることでソフトウェアへの理解を深める。Masked Language Modelingのソフトウェア版。「ソフトウェアのコードをマスクして問題を作って」「ヒントが欲しい」「答え・解説を見せて」といった依頼で使用する。
 
@@ -46,6 +49,7 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill ar
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiled-me
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill check-lts
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill grounded-report
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill invest-task-splitter
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill masked-software-modeling
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill setup-loop
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill slack-canvas-comment-threads
@@ -67,6 +71,7 @@ Claude Desktopへのアップロードを行うAPI/CLIは提供されていな�
     zip -r boiled-me.zip boiled-me
     zip -r check-lts.zip check-lts
     zip -r grounded-report.zip grounded-report
+    zip -r invest-task-splitter.zip invest-task-splitter
     zip -r masked-software-modeling.zip masked-software-modeling
     zip -r setup-loop.zip setup-loop
     zip -r slack-canvas-comment-threads.zip slack-canvas-comment-threads
