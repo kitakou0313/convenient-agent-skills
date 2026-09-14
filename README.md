@@ -6,6 +6,9 @@
 ### architecture-map
 対象コードベースの構造を、依存関係の簡易マップと、機能（エントリーポイント）ごとのデータフロー図（クラス/構造体間でやりとりされるデータの型と責務）としてインタラクティブなHTMLで可視化する。Java/Go/Node.jsは標準ツールで補強し、他言語はAIの読解でフォールバックする。「このコードベースのアーキテクチャを教えて」「アーキテクチャを可視化して」「このリポジトリの構造を理解したい」「このソフトウェアの構造を把握したい」といった依頼で使用する。
 
+### audit-requirements-based-on-ieee830
+IEEE Std 830が定義するSRS(Software Requirements Specification)の品質特性（Correct/Unambiguous/Complete/Consistent/Ranked for importance and stability/Verifiable/Modifiable/Traceable）に基づき、渡された要件を評価し改善点をフィードバックする。要件が2件以上渡された場合は要件セット全体で判定する特性（Complete/Consistent/Ranked）も評価し、単一要件のみの場合はそれらを「判定不可」として明示する。要件テキストの範囲内でのみ判定し、外部文脈（上位仕様・ビジネス優先度・トレーサビリティ情報等）が必要な項目は判定不可とその根拠・必要情報を明記する。問題のある要件には指摘点を統合した書き直し案を提示するが、確定的な置き換えとしては提示しない。評価と改善案の提示のみを行い、以降どう反映するかはユーザーに委ねる。「この要件をIEEE830の観点で評価して」「要件の品質をチェックして」「この要件は曖昧じゃないか確認して」「要件を検証して」「要件の改善点を教えて」といった依頼で使用する。
+
 ### boiled-me
 文書全体を意味を落とさずに要約・凝縮する。論証構造を持つ箇所は内部的に論証図（従属前提・独立前提・中間結論）を構築して支持関係を壊さない圧縮かどうかを検証し、手順・時系列・箇条書きなど論証構造を持たない箇所は重複排除を手がかりに原文の順序を保ったまま圧縮する。圧縮方針をユーザーと確認しながら短文の連なりに仕上げ、元の文章に反映する。「文章を要約して」「文章を短くして」「長い文章を凝縮して」「手順書を簡潔にして」といった依頼で使用する。
 
@@ -46,6 +49,7 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --list
 <!-- SKILLS:CODE:START -->
 ```
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill architecture-map
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill audit-requirements-based-on-ieee830
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiled-me
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill check-lts
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill grounded-report
@@ -68,6 +72,7 @@ Claude Desktopへのアップロードを行うAPI/CLIは提供されていな�
     ```
     cd skills
     zip -r architecture-map.zip architecture-map
+    zip -r audit-requirements-based-on-ieee830.zip audit-requirements-based-on-ieee830
     zip -r boiled-me.zip boiled-me
     zip -r check-lts.zip check-lts
     zip -r grounded-report.zip grounded-report
