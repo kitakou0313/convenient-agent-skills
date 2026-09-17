@@ -114,3 +114,9 @@ bash scripts/install-hooks.sh
 - skills作成時の方針をCLAUDE.mdにまとめる
     - Claude Codeに依存しない
         - 組み込みのskillsに依存しない
+- skillsの品質定義とそれに基づく改善
+    - SoQBooKが使えそう
+    - Tokenを少なくする
+        - 別Agent切り出し
+        - 自動化できる処理をスクリプトに落とし込む
+    - コンテキストエンジニアリングの考え方
