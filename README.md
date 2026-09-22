@@ -16,7 +16,7 @@ IEEE Std 830が定義するSRS(Software Requirements Specification)の品質特�
 文書全体を意味を落とさずに要約・凝縮する。論証構造を持つ箇所は内部的に論証図（従属前提・独立前提・中間結論）を構築して支持関係を壊さない圧縮かどうかを検証し、手順・時系列・箇条書きなど論証構造を持たない箇所は重複排除を手がかりに原文の順序を保ったまま圧縮する。圧縮方針をユーザーと確認しながら短文の連なりに仕上げ、元の文章に反映する。「文章を要約して」「文章を短くして」「長い文章を凝縮して」「手順書を簡潔にして」といった依頼で使用する。
 
 ### check-lts
-Check LTS support status for Go, Node.js, Java, Python, and PHP by fetching official release pages. Use when asked about LTS versions, support lifecycle, or EOL dates for these languages.
+Go、Node.js、Java、Python、PHPの公式リリースページを取得し、LTSサポート状況を確認する。LTSバージョンやサポート期間、EOL（サポート終了日）について尋ねられた際に使用する。
 
 ### grounded-report
 ユーザーが指定した目的を満たす、根拠資料に基づいたHTMLレポートを生成する。対象読者の前提知識に応じた用語の先出し定義、目的達成度、論理構成の妥当性、引用の有無、引用元との整合性の5点を、実装文脈を持たない独立した検証者が自動検証し、実行→検証→修正のループで基準を満たすまで自律的に改善する。「レポートを作って」「根拠付きのレポートが欲しい」「調べてレポートにまとめて」といった依頼で使用する。
@@ -28,7 +28,7 @@ Check LTS support status for Go, Node.js, Java, Python, and PHP by fetching offi
 指定したソフトウェアの一部のロジックを削除（マスク）し、ユーザー自身に再実装させることでソフトウェアへの理解を深める。Masked Language Modelingのソフトウェア版。「ソフトウェアのコードをマスクして問題を作って」「ヒントが欲しい」「答え・解説を見せて」といった依頼で使用する。
 
 ### setup-loop
-Interview the user to build an autonomous execute-verify loop for a task — gathering execution steps, verification method (always via subagent), and termination conditions — then pre-approve required commands/tools and run the loop until the termination condition is met. Use when the user wants to set up an autonomous iteration loop (execute, verify, fix, repeat) for a task.
+タスクを「実行→検証→修正」のループで自律的に進めるため、実行手順・検証方法（常にサブエージェント経由）・終了条件をユーザーにヒアリングしてループを構築し、必要なコマンド・ツールを事前承認した上で終了条件を満たすまでループを実行する。ユーザーが自律的な反復ループ（実行・検証・修正・繰り返し）の構築を望む場合に使用する。
 
 ### slack-canvas-comment-threads
 SlackのCanvas URLを渡すと、そのCanvasに付けられたコメント（Canvasネイティブの注釈コメント。通常のチャンネルスレッドとは別物だが、実体はfile conversation上のメッセージ/スレッドとして保持されている）を網羅的に洗い出し、網羅性を検証した上でリンクと内容の要約をユーザーに提示する。「CanvasのコメントをまとめてSlack Canvasのコメントスレッドを取得して」「このCanvasについたコメントを全部見せて」といった依頼で使用する。

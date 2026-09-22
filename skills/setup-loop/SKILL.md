@@ -1,6 +1,6 @@
 ---
 name: setup-loop
-description: Interview the user to build an autonomous execute-verify loop for a task — gathering execution steps, verification method (always via subagent), and termination conditions — then pre-approve required commands/tools and run the loop until the termination condition is met. Use when the user wants to set up an autonomous iteration loop (execute, verify, fix, repeat) for a task.
+description: タスクを「実行→検証→修正」のループで自律的に進めるため、実行手順・検証方法（常にサブエージェント経由）・終了条件をユーザーにヒアリングしてループを構築し、必要なコマンド・ツールを事前承認した上で終了条件を満たすまでループを実行する。ユーザーが自律的な反復ループ（実行・検証・修正・繰り返し）の構築を望む場合に使用する。
 ---
 
 # Setup Loop — 実行・検証ループの構築と自律実行

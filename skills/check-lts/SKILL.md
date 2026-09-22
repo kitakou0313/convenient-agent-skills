@@ -1,6 +1,6 @@
 ---
 name: check-lts
-description: Check LTS support status for Go, Node.js, Java, Python, and PHP by fetching official release pages. Use when asked about LTS versions, support lifecycle, or EOL dates for these languages.
+description: Go、Node.js、Java、Python、PHPの公式リリースページを取得し、LTSサポート状況を確認する。LTSバージョンやサポート期間、EOL（サポート終了日）について尋ねられた際に使用する。
 compatibility: Requires internet access to fetch official release pages
 ---
 
