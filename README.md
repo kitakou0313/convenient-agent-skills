@@ -104,19 +104,3 @@ bash scripts/install-hooks.sh
 ```
 
 以後、コミットのたびに `scripts/sync_skills.py` が自動実行され、README.mdの更新（変更があれば）と `dist/desktop-skills/`（git管理外）へのZIP再生成が行われる。
-
-## ToDo
-- AIで生成された文章を煎じ詰めて短くするskills
-    - 論理構造の分析に引っ張られすぎて手順書などの要約に適用できない
-- skillsのテストを行うskills
-- ソフトウェアの構造、依存関係などを一眼で理解できるskillsの作成
-    - CIで実行したいので全文の読み込みなどは行わないようにする
-- skills作成時の方針をCLAUDE.mdにまとめる
-    - Claude Codeに依存しない
-        - 組み込みのskillsに依存しない
-- skillsの品質定義とそれに基づく改善
-    - SoQBooKが使えそう
-    - Tokenを少なくする
-        - 別Agent切り出し
-        - 自動化できる処理をスクリプトに落とし込む
-    - コンテキストエンジニアリングの考え方
