@@ -1,0 +1,6 @@
+# 従属前提グループ（p99 5ms要件 + GC停止）は片方だけ削ると支持が崩れる
+must: Rust
+must: 5ms
+must: 数十ms
+may: 3名
+may: メモリ安全性

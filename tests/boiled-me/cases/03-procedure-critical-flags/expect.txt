@@ -1,0 +1,8 @@
+# 実行に必須の数値・フラグが短い文に埋まっている
+must: 2.4.1
+must: 8443:8443
+must: --restart=always
+must: /healthz
+must: --tail 200
+may: latest
+order: docker pull < docker run < /healthz < docker logs

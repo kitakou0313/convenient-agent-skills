@@ -1,0 +1,7 @@
+# 独立前提が4つ。結論は必ず残り、前提は少なくとも1つ残る（残存数は圧縮度合いの目安として記録）
+must: Markdown
+any: diff | 書き慣れて | markdownlint | 静的サイトジェネレータ
+may: diff
+may: 書き慣れて
+may: markdownlint
+may: 静的サイトジェネレータ
