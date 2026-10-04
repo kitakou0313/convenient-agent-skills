@@ -12,8 +12,11 @@ IEEE Std 830が定義するSRS(Software Requirements Specification)の品質特�
 ### audit-requirements-quality
 IEEE Std 830が定義するSRS(Software Requirements Specification)の品質特性（Correct/Unambiguous/Complete/Consistent/Ranked for importance and stability/Verifiable/Modifiable/Traceable）の考え方を、ソフトウェアに限らずあらゆる要求（ビジネス要件・法務/契約条項・組織/業務規程・個人の計画等）に一般化した基準で評価し、改善点をフィードバックする。要件が2件以上渡された場合は要件セット全体で判定する特性（Complete/Consistent/Ranked）も評価し、単一要件のみの場合はそれらを「判定不可」として明示する。要件テキストの範囲内でのみ判定し、外部文脈（上位方針・優先度・トレーサビリティ情報等）が必要な項目は判定不可とその根拠・必要情報を明記する。問題のある要件には指摘点を統合した書き直し案を提示するが、確定的な置き換えとしては提示しない。評価と改善案の提示のみを行い、以降どう反映するかはユーザーに委ねる。「この要件の品質を評価して」「要件が曖昧じゃないか確認して」「要件定義書をレビューして」「この要求仕様は完全か確認して」「要件の改善点を教えて」といった依頼で使用する。
 
-### boiled-me
-文書全体を意味を落とさずに要約・凝縮する。論証構造を持つ箇所は内部的に論証図（従属前提・独立前提・中間結論）を構築して支持関係を壊さない圧縮かどうかを検証し、手順・時系列・箇条書きなど論証構造を持たない箇所は重複排除を手がかりに原文の順序を保ったまま圧縮する。圧縮方針をユーザーと確認しながら短文の連なりに仕上げ、元の文章に反映する。「文章を要約して」「文章を短くして」「長い文章を凝縮して」「手順書を簡潔にして」といった依頼で使用する。
+### boiling-docs
+文書全体を意味を落とさずに要約・凝縮する。要約の生成は boiling-docs-core に任せ、このスキルはユーザーとの対話（圧縮方針の確認、迷った箇所の質問、要約案のレビュー）と元の文章への反映を担当する。圧縮方針をユーザーと確認しながら短文の連なりに仕上げ、元の文章に反映する。利用には boiling-docs-core も導入されている必要がある。「文章を要約して」「文章を短くして」「長い文章を凝縮して」「手順書を簡潔にして」といった依頼で使用する。
+
+### boiling-docs-core
+文書を意味を落とさず凝縮した要約案を、ユーザーに質問せず非対話で生成する。論証構造を持つ箇所は内部的に論証図（従属前提・独立前提・中間結論）で支持関係を壊さない圧縮かを検証し、手順・時系列・箇条書きなど論証構造を持たない箇所は重複排除を手がかりに原文の順序を保って圧縮する。圧縮方針・要約案・未確定事項をタグ区切りで返すだけで、ユーザーとの対話や元の文章への反映は行わない。他のskillやCIから名前を指定して明示的に呼び出す用途。
 
 ### check-lts
 Go、Node.js、Java、Python、PHPの公式リリースページを取得し、LTSサポート状況を確認する。LTSバージョンやサポート期間、EOL（サポート終了日）について尋ねられた際に使用する。
@@ -54,7 +57,8 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --list
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill architecture-map
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill audit-requirements-based-on-ieee830
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill audit-requirements-quality
-npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiled-me
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiling-docs
+npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill boiling-docs-core
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill check-lts
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill grounded-report
 npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill invest-task-splitter
@@ -65,8 +69,10 @@ npx skills add https://github.com/kitakou0313/convenient-agent-skills --skill te
 ```
 <!-- SKILLS:CODE:END -->
 
+`boiling-docs` は要約の生成を `boiling-docs-core` に任せるため、両方のスキルをインストールする必要がある（Claude Desktopの場合は両方のZIPをアップロードする）。`boiling-docs-core` は対話を行わず、他のスキルやCIから名前を指定して呼び出す用途にも使える。
+
 ### Claude Desktop
-Claude CodeとClaude Desktopはスキルの保存場所が別のため、使いたいスキルを手動でアップロードする。ZIPのルート直下にスキルのフォルダ、その1階層下に`SKILL.md`が来る構成にする必要がある（例: `boiled-me.zip` の中に `boiled-me/SKILL.md`）。
+Claude CodeとClaude Desktopはスキルの保存場所が別のため、使いたいスキルを手動でアップロードする。ZIPのルート直下にスキルのフォルダ、その1階層下に`SKILL.md`が来る構成にする必要がある（例: `boiling-docs.zip` の中に `boiling-docs/SKILL.md`）。
 
 Claude Desktopへのアップロードを行うAPI/CLIは提供されていないため、Desktopへの追加は最終的に手動操作になる。以下の手順1（ZIP化）は自動化されており、コミット時に `dist/desktop-skills/` へ最新のZIPが生成される（gitでは管理しない）。手順2以降はDesktopアプリ上での手動操作が必要。
 
@@ -78,7 +84,8 @@ Claude Desktopへのアップロードを行うAPI/CLIは提供されていな�
     zip -r architecture-map.zip architecture-map
     zip -r audit-requirements-based-on-ieee830.zip audit-requirements-based-on-ieee830
     zip -r audit-requirements-quality.zip audit-requirements-quality
-    zip -r boiled-me.zip boiled-me
+    zip -r boiling-docs.zip boiling-docs
+    zip -r boiling-docs-core.zip boiling-docs-core
     zip -r check-lts.zip check-lts
     zip -r grounded-report.zip grounded-report
     zip -r invest-task-splitter.zip invest-task-splitter

@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# boiled-me の情報保存テストを実行する。
-# 各ケースの input.md を Agent に要約させ、expect.txt のアンカーが生成文章に残っているかを機械照合する。
+# boiling-docs-core の情報保存テストを実行する。
+# 各ケースの input.md（と任意の constraints.txt）を Agent に処理させ、expect.txt のアンカーが
+# 出力の <draft> / <unresolved> に残っているかを機械照合する。
 #
-# 使い方: tests/boiled-me/run.sh [-n 実行回数] [ケース名の先頭一致 ...]
+# 使い方: tests/boiling-docs-core/run.sh [-n 実行回数] [ケース名の先頭一致 ...]
 # 環境変数: AGENT_CMD  プロンプトを標準入力で受け取り、応答を標準出力に返すコマンド（既定: "claude -p"）
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
-skill_file="$repo_root/skills/boiled-me/SKILL.md"
+skill_file="$repo_root/skills/boiling-docs-core/SKILL.md"
 cases_dir="$script_dir/cases"
 agent_cmd="${AGENT_CMD:-claude -p}"
 runs=3
@@ -70,8 +71,13 @@ extract_tag() {
   printf '%s' "${rest%%"$close"*}"
 }
 
+# 追加制約ファイルの有効行（空行と # で始まる行を除く）
+constraint_lines() {
+  grep -Ev '^([[:space:]]*#|[[:space:]]*$)' "$1" || true
+}
+
 build_prompt() {
-  local input_file="$1"
+  local case_dir="$1"
   cat <<EOF
 あなたは以下のスキル定義（SKILL.md）に従って動作してください。
 
@@ -79,31 +85,32 @@ build_prompt() {
 $(cat "$skill_file")
 --- SKILL.md ここまで ---
 
-## テスト実行モード（自動承認）
-
-これは自動テストです。ユーザーへの質問や確認で停止せず、以下の既定に従って1回の応答の中でPhase 1〜4を完了してください。
-
-- ソース種別は「テキスト」として扱う。Phase 5はチャットへの最終文章の出力のみとし、ファイル編集などは行わない
-- Phase 3の大枠確認は、全セグメントOKとして進める
-- Phase 4の要約案は、初回案がそのまま承認されたものとして扱う
-- 分類や重複判定に迷う項目、確認が必要になる項目は、情報を残す側（保守的な側）で判断して進める
-- 出力形式: Phase 3の概要を <phase3> と </phase3> の間に、Phase 4の要約案（最終文章のみ）を <phase4> と </phase4> の間に出力する
-
 ## 対象文書
 
 <document>
-$(cat "$input_file")
+$(cat "$case_dir/input.md")
 </document>
 EOF
+  if [ -f "$case_dir/constraints.txt" ]; then
+    cat <<EOF
+
+## 追加制約
+
+$(constraint_lines "$case_dir/constraints.txt")
+EOF
+  fi
 }
 
-# 1回分の生成文章を expect.txt で照合し、"type<TAB>anchor<TAB>0|1" を標準出力に返す
+# 1回分の出力を expect.txt で照合し、"type<TAB>anchor<TAB>0|1" を標準出力に返す
+#   draft_text:      <draft> の中身（must / may / any / order の照合対象）
+#   unresolved_text: <unresolved> の中身（flag の照合対象）
+#   leak_text:       内部ID漏洩の確認対象（<plan>・<draft>・<unresolved> を連結したもの）
 check_run() {
-  local expect_file="$1" text="$2" format_ok="$3"
+  local expect_file="$1" draft_text="$2" unresolved_text="$3" leak_text="$4" format_ok="$5"
   local line key val ok parts p prev cur part any_hit
 
   printf 'format\t-\t%s\n' "$format_ok"
-  if printf '%s' "$text" | grep -Eq '(^|[^A-Za-z0-9])(IC[0-9]+|G[0-9]+|P[0-9]+[a-z]?|C[0-9]+|S[0-9]+)([^A-Za-z0-9]|$)'; then
+  if printf '%s' "$leak_text" | grep -Eq '(^|[^A-Za-z0-9])(IC[0-9]+|G[0-9]+|P[0-9]+[a-z]?|C[0-9]+|S[0-9]+)([^A-Za-z0-9]|$)'; then
     printf 'idleak\t-\t0\n'
   else
     printf 'idleak\t-\t1\n'
@@ -115,15 +122,19 @@ check_run() {
     val="$(trim "${line#*:}")"
     case "$key" in
       must|may)
-        if [ "$(pos_of "$text" "$val")" -ge 0 ]; then ok=1; else ok=0; fi
+        if [ "$(pos_of "$draft_text" "$val")" -ge 0 ]; then ok=1; else ok=0; fi
         printf '%s\t%s\t%s\n' "$key" "$val" "$ok"
+        ;;
+      flag)
+        if [ "$(pos_of "$unresolved_text" "$val")" -ge 0 ]; then ok=1; else ok=0; fi
+        printf 'flag\t%s\t%s\n' "$val" "$ok"
         ;;
       any)
         any_hit=0
         IFS='|' read -ra parts <<<"$val"
         for part in "${parts[@]}"; do
           p="$(trim "$part")"
-          if [ "$(pos_of "$text" "$p")" -ge 0 ]; then any_hit=1; fi
+          if [ "$(pos_of "$draft_text" "$p")" -ge 0 ]; then any_hit=1; fi
         done
         printf 'any\t%s\t%s\n' "$val" "$any_hit"
         ;;
@@ -133,7 +144,7 @@ check_run() {
         IFS='<' read -ra parts <<<"$val"
         for part in "${parts[@]}"; do
           p="$(trim "$part")"
-          cur="$(pos_of "$text" "$p")"
+          cur="$(pos_of "$draft_text" "$p")"
           if [ "$cur" -lt 0 ] || [ "$cur" -le "$prev" ]; then ok=0; fi
           prev="$cur"
         done
@@ -156,7 +167,7 @@ write_report() {
     echo "# $name"
     echo
     echo "- 判定: **$status**（実行 ${runs} 回）"
-    echo "- 必須アンカー（must / any / order）の通過率が100%未満なら FAIL。may・idleak・format は記録のみ"
+    echo "- 必須アンカー（must / any / order / flag）の通過率が100%未満なら FAIL。may・idleak・format は記録のみ"
     echo
     echo "## アンカーの照合結果"
     echo
@@ -183,6 +194,14 @@ write_report() {
     echo '````markdown'
     cat "$case_dir/input.md"
     echo '````'
+    if [ -f "$case_dir/constraints.txt" ]; then
+      echo
+      echo "## 追加制約（constraints.txt）"
+      echo
+      echo '````text'
+      cat "$case_dir/constraints.txt"
+      echo '````'
+    fi
     echo
     echo "## 期待値（expect.txt）"
     echo
@@ -194,14 +213,23 @@ write_report() {
       echo "## 生成文章 run-$i"
       echo
       echo '````markdown'
-      cat "$case_out/run-$i.phase4.md"
+      cat "$case_out/run-$i.draft.md"
       echo
       echo '````'
       echo
-      echo "<details><summary>Phase 3 の概要 / 生の応答は run-$i.md</summary>"
+      echo "<details><summary>方針サマリ・未確定事項 / 生の応答は run-$i.md</summary>"
+      echo
+      echo "方針サマリ（plan）"
       echo
       echo '````markdown'
-      cat "$case_out/run-$i.phase3.md"
+      cat "$case_out/run-$i.plan.md"
+      echo
+      echo '````'
+      echo
+      echo "未確定事項（unresolved）"
+      echo
+      echo '````markdown'
+      cat "$case_out/run-$i.unresolved.md"
       echo
       echo '````'
       echo
@@ -215,7 +243,7 @@ ts="$(date +%Y%m%d-%H%M%S)"
 out_root="$script_dir/out/$ts"
 mkdir -p "$out_root"
 summary="$out_root/summary.tsv"
-printf 'case\tstatus\tmust\torder\tany\tmay\tidleak_ok\tformat_ok\n' >"$summary"
+printf 'case\tstatus\tmust\torder\tany\tflag\tmay\tidleak_ok\tformat_ok\n' >"$summary"
 any_fail=0
 ran=0
 
@@ -229,7 +257,7 @@ for case_dir in "$cases_dir"/*/; do
   ran=$((ran + 1))
   case_out="$out_root/$name"
   mkdir -p "$case_out"
-  build_prompt "$case_dir/input.md" >"$case_out/prompt.txt"
+  build_prompt "$case_dir" >"$case_out/prompt.txt"
 
   for i in $(seq 1 "$runs"); do
     echo "[$name] run $i/$runs" >&2
@@ -240,27 +268,31 @@ for case_dir in "$cases_dir"/*/; do
     fi
     raw_text="$(cat "$raw")"
     format_ok=1
-    phase4="$(extract_tag phase4 "$raw_text")" || { phase4="$raw_text"; format_ok=0; }
-    phase3="$(extract_tag phase3 "$raw_text")" || phase3=""
+    draft="$(extract_tag draft "$raw_text")" || { draft="$raw_text"; format_ok=0; }
+    plan="$(extract_tag plan "$raw_text")" || { plan=""; format_ok=0; }
+    unresolved="$(extract_tag unresolved "$raw_text")" || { unresolved=""; format_ok=0; }
     [ -n "$raw_text" ] || format_ok=0
-    printf '%s\n' "$phase4" >"$case_out/run-$i.phase4.md"
-    printf '%s\n' "$phase3" >"$case_out/run-$i.phase3.md"
-    check_run "$case_dir/expect.txt" "$phase4" "$format_ok" >"$case_out/run-$i.check"
+    printf '%s\n' "$draft" >"$case_out/run-$i.draft.md"
+    printf '%s\n' "$plan" >"$case_out/run-$i.plan.md"
+    printf '%s\n' "$unresolved" >"$case_out/run-$i.unresolved.md"
+    check_run "$case_dir/expect.txt" "$draft" "$unresolved" "$plan
+$draft
+$unresolved" "$format_ok" >"$case_out/run-$i.check"
   done
 
   # 種別ごとの通過数/総数を集計し、必須系に1つでも未通過があれば FAIL
   stats="$(cat "$case_out"/run-*.check | awk -F'\t' '
     { s[$1] += $3; n[$1]++ }
     END {
-      split("must order any may idleak format", types, " ")
-      for (j = 1; j <= 6; j++) {
+      split("must order any flag may idleak format", types, " ")
+      for (j = 1; j <= 7; j++) {
         t = types[j]
         printf "%s%d/%d", (j > 1 ? "\t" : ""), s[t] + 0, n[t] + 0
       }
       printf "\n"
     }')"
   status=PASS
-  for t in 1 2 3; do
+  for t in 1 2 3 4; do
     cell="$(printf '%s' "$stats" | cut -f"$t")"
     [ "${cell%/*}" = "${cell#*/}" ] || status=FAIL
   done

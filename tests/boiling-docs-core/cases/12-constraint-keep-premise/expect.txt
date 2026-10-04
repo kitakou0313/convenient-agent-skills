@@ -1,0 +1,6 @@
+# 追加制約で指定した独立前提は、通常なら削られうるが、必ず残る
+must: Markdown
+must: markdownlint
+must: 静的サイトジェネレータ
+may: diff
+may: 書き慣れて
