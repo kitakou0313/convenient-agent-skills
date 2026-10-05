@@ -1,9 +1,11 @@
-# 手順＋理由づけ。理由は省略してよいが、ステップは省略不可
+# 手順＋理由づけ。ステップも理由も削除されない。手順は番号付きのまま残る
 must: find /var/log/app -mtime +30 -delete
 must: ./manage.sh rebuild-cache
 must: systemctl stop batch.timer
 must: systemctl start batch.timer
-may: ディスク容量
-may: 不整合
-may: 二重実行
+must: ディスク容量
+must: 不整合
+must: 二重実行
 order: find /var/log/app < rebuild-cache < systemctl stop batch.timer < systemctl start batch.timer
+numbered: 5
+maxlen: 50

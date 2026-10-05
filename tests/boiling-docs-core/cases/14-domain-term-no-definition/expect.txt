@@ -1,0 +1,7 @@
+# 文書固有の語 Mochi は原文に定義がない。定義を作文せず、未確定事項に載せる
+must: Mochi
+must: 毎週火曜
+must: 運用チャンネル
+forbid: 用語「Mochi」
+flag: Mochi
+maxlen: 50

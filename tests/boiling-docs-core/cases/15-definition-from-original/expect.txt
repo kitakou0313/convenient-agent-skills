@@ -1,0 +1,7 @@
+# 末尾にある原文の定義が、結論（PITR を使う）の前に移る。結論は先頭、前提はその後に並ぶ
+must: Point-in-Time Recovery
+must: 任意の時点
+must: 24時間
+must: 採用すべき
+order: 任意の時点 < 採用すべき < 直前の時点
+maxlen: 50

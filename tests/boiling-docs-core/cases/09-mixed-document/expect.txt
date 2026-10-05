@@ -1,10 +1,12 @@
-# 論証セグメントと非論証セグメント（手順）が交互に並ぶ。種別ごとにアンカーが残る
+# 論証セグメントと非論証セグメント（手順）が交互に並ぶ。理由づけも削除されない。手順は番号付きのまま残る
 must: GitHub Actions
 must: 20時間
+must: 脆弱性
 must: .github/workflows/ci.yml
 must: DEPLOY_TOKEN
 must: act -j build
 must: 2週間
 must: jenkins-cli disable-job
-may: 脆弱性
 order: .github/workflows/ci.yml < DEPLOY_TOKEN < act -j build < jenkins-cli disable-job
+numbered: 6
+maxlen: 50

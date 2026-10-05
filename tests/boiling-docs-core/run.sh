@@ -33,6 +33,8 @@ case "$runs" in
   ''|*[!0-9]*|0) echo "-n must be a positive integer" >&2; exit 2 ;;
 esac
 
+command -v python3 >/dev/null 2>&1 || { echo "python3 is required (used by the maxlen check)" >&2; exit 2; }
+
 trim() {
   local s="$1"
   s="${s#"${s%%[![:space:]]*}"}"
@@ -76,6 +78,32 @@ constraint_lines() {
   grep -Ev '^([[:space:]]*#|[[:space:]]*$)' "$1" || true
 }
 
+# draft の各文のうち limit 文字を超えるものを列挙する。見出し・コード・URL・「」内の引用は数えない
+long_sentences() {
+  local limit="$1"
+  python3 -c '
+import re, sys
+limit = int(sys.argv[1])
+for line in sys.stdin.read().splitlines():
+    s = line.strip()
+    if not s or s.startswith("#"):
+        continue
+    s = re.sub(r"^([-*+]|\d+[.)．])\s+", "", s)
+    s = re.sub(r"`[^`]*`", "", s)
+    s = re.sub(r"https?://\S+", "", s)
+    s = re.sub(r"「[^」]*」", "「」", s)
+    for sent in re.split(r"(?<=[。！？!?])", s):
+        sent = sent.strip()
+        if len(sent) > limit:
+            print(sent)
+' "$limit"
+}
+
+# draft 中の番号付き箇条書き（"1. " "2) " など）の行数
+numbered_count() {
+  printf '%s\n' "$1" | grep -Ec '^[[:space:]]*[0-9]+[.)．][[:space:]]' || true
+}
+
 build_prompt() {
   local case_dir="$1"
   cat <<EOF
@@ -91,6 +119,14 @@ $(cat "$skill_file")
 $(cat "$case_dir/input.md")
 </document>
 EOF
+  if [ -f "$case_dir/audience.txt" ]; then
+    cat <<EOF
+
+## 想定読者
+
+$(cat "$case_dir/audience.txt")
+EOF
+  fi
   if [ -f "$case_dir/constraints.txt" ]; then
     cat <<EOF
 
@@ -102,19 +138,15 @@ EOF
 }
 
 # 1回分の出力を expect.txt で照合し、"type<TAB>anchor<TAB>0|1" を標準出力に返す
-#   draft_text:      <draft> の中身（must / may / any / order の照合対象）
+#   draft_text:      <draft> の中身（must / may / any / order / forbid / maxlen / numbered の照合対象）
 #   unresolved_text: <unresolved> の中身（flag の照合対象）
-#   leak_text:       内部ID漏洩の確認対象（<plan>・<draft>・<unresolved> を連結したもの）
+#   long_file:       maxlen で超過した文を書き出すファイル
 check_run() {
-  local expect_file="$1" draft_text="$2" unresolved_text="$3" leak_text="$4" format_ok="$5"
-  local line key val ok parts p prev cur part any_hit
+  local expect_file="$1" draft_text="$2" unresolved_text="$3" format_ok="$4" long_file="$5"
+  local line key val ok parts p prev cur part any_hit n
 
   printf 'format\t-\t%s\n' "$format_ok"
-  if printf '%s' "$leak_text" | grep -Eq '(^|[^A-Za-z0-9])(IC[0-9]+|G[0-9]+|P[0-9]+[a-z]?|C[0-9]+|S[0-9]+)([^A-Za-z0-9]|$)'; then
-    printf 'idleak\t-\t0\n'
-  else
-    printf 'idleak\t-\t1\n'
-  fi
+  : >"$long_file"
 
   while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in ''|'#'*) continue ;; esac
@@ -137,6 +169,20 @@ check_run() {
           if [ "$(pos_of "$draft_text" "$p")" -ge 0 ]; then any_hit=1; fi
         done
         printf 'any\t%s\t%s\n' "$val" "$any_hit"
+        ;;
+      forbid)
+        if [ "$(pos_of "$draft_text" "$val")" -lt 0 ]; then ok=1; else ok=0; fi
+        printf 'forbid\t%s\t%s\n' "$val" "$ok"
+        ;;
+      maxlen)
+        long_sentences "$val" <<<"$draft_text" >>"$long_file"
+        if [ -s "$long_file" ]; then ok=0; else ok=1; fi
+        printf 'maxlen\t%s\t%s\n' "$val" "$ok"
+        ;;
+      numbered)
+        n="$(numbered_count "$draft_text")"
+        if [ "$n" -ge "$val" ]; then ok=1; else ok=0; fi
+        printf 'numbered\t%s\t%s\n' "$val" "$ok"
         ;;
       order)
         ok=1
@@ -167,7 +213,7 @@ write_report() {
     echo "# $name"
     echo
     echo "- 判定: **$status**（実行 ${runs} 回）"
-    echo "- 必須アンカー（must / any / order / flag）の通過率が100%未満なら FAIL。may・idleak・format は記録のみ"
+    echo "- 必須アンカー（must / any / order / flag / forbid / maxlen / numbered）の通過率が100%未満なら FAIL。may・format は記録のみ"
     echo
     echo "## アンカーの照合結果"
     echo
@@ -194,6 +240,14 @@ write_report() {
     echo '````markdown'
     cat "$case_dir/input.md"
     echo '````'
+    if [ -f "$case_dir/audience.txt" ]; then
+      echo
+      echo "## 想定読者（audience.txt）"
+      echo
+      echo '````text'
+      cat "$case_dir/audience.txt"
+      echo '````'
+    fi
     if [ -f "$case_dir/constraints.txt" ]; then
       echo
       echo "## 追加制約（constraints.txt）"
@@ -216,6 +270,14 @@ write_report() {
       cat "$case_out/run-$i.draft.md"
       echo
       echo '````'
+      if [ -s "$case_out/run-$i.maxlen.txt" ]; then
+        echo
+        echo "文字数の上限を超えた文（maxlen）"
+        echo
+        echo '````text'
+        cat "$case_out/run-$i.maxlen.txt"
+        echo '````'
+      fi
       echo
       echo "<details><summary>方針サマリ・未確定事項 / 生の応答は run-$i.md</summary>"
       echo
@@ -243,7 +305,7 @@ ts="$(date +%Y%m%d-%H%M%S)"
 out_root="$script_dir/out/$ts"
 mkdir -p "$out_root"
 summary="$out_root/summary.tsv"
-printf 'case\tstatus\tmust\torder\tany\tflag\tmay\tidleak_ok\tformat_ok\n' >"$summary"
+printf 'case\tstatus\tmust\torder\tany\tflag\tforbid\tmaxlen\tnumbered\tmay\tformat_ok\n' >"$summary"
 any_fail=0
 ran=0
 
@@ -275,24 +337,22 @@ for case_dir in "$cases_dir"/*/; do
     printf '%s\n' "$draft" >"$case_out/run-$i.draft.md"
     printf '%s\n' "$plan" >"$case_out/run-$i.plan.md"
     printf '%s\n' "$unresolved" >"$case_out/run-$i.unresolved.md"
-    check_run "$case_dir/expect.txt" "$draft" "$unresolved" "$plan
-$draft
-$unresolved" "$format_ok" >"$case_out/run-$i.check"
+    check_run "$case_dir/expect.txt" "$draft" "$unresolved" "$format_ok" "$case_out/run-$i.maxlen.txt" >"$case_out/run-$i.check"
   done
 
   # 種別ごとの通過数/総数を集計し、必須系に1つでも未通過があれば FAIL
   stats="$(cat "$case_out"/run-*.check | awk -F'\t' '
     { s[$1] += $3; n[$1]++ }
     END {
-      split("must order any flag may idleak format", types, " ")
-      for (j = 1; j <= 7; j++) {
+      split("must order any flag forbid maxlen numbered may format", types, " ")
+      for (j = 1; j <= 9; j++) {
         t = types[j]
         printf "%s%d/%d", (j > 1 ? "\t" : ""), s[t] + 0, n[t] + 0
       }
       printf "\n"
     }')"
   status=PASS
-  for t in 1 2 3 4; do
+  for t in 1 2 3 4 5 6 7; do
     cell="$(printf '%s' "$stats" | cut -f"$t")"
     [ "${cell%/*}" = "${cell#*/}" ] || status=FAIL
   done

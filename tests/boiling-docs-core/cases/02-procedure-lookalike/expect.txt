@@ -6,3 +6,5 @@ must: config/prod.yaml
 must: deploy.sh --env prod
 must: smoke.sh prod
 order: deploy.sh --env stg < deploy.sh --env prod
+numbered: 6
+maxlen: 50

@@ -1,7 +1,7 @@
-# 独立前提が4つ。結論は必ず残り、前提は少なくとも1つ残る（残存数は圧縮度合いの目安として記録）
+# 独立した理由が4つ。削除しないので、すべて残る
 must: Markdown
-any: diff | 書き慣れて | markdownlint | 静的サイトジェネレータ
-may: diff
-may: 書き慣れて
-may: markdownlint
-may: 静的サイトジェネレータ
+must: diff
+must: 書き慣れて
+must: markdownlint
+must: 静的サイトジェネレータ
+maxlen: 50

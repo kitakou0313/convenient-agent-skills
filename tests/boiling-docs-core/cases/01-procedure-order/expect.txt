@@ -1,4 +1,4 @@
-# 順序依存の手順。順序が崩れると手順が成立しない
+# 順序依存の手順。順序が崩れると手順が成立しない。番号付き箇条書きのまま残る
 must: touch /var/run/maintenance.flag
 must: pg_dump -Fc app_db
 must: backup_0301.dump
@@ -6,3 +6,5 @@ must: migrate --plan
 must: systemctl restart app.service
 must: rm /var/run/maintenance.flag
 order: touch /var/run/maintenance.flag < pg_dump -Fc app_db < migrate --plan < systemctl restart app.service < rm /var/run/maintenance.flag
+numbered: 6
+maxlen: 50
