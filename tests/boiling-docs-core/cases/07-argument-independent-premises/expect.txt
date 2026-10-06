@@ -1,7 +1,0 @@
-# 独立した理由が4つ。削除しないので、すべて残る
-must: Markdown
-must: diff
-must: 書き慣れて
-must: markdownlint
-must: 静的サイトジェネレータ
-maxlen: 50

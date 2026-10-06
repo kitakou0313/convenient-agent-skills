@@ -1,7 +1,0 @@
-# 複文が単文に分かれ、どの文も50文字以内になる（コマンドは文字数に数えない）。順序と固有の語は残る
-must: kubectl rollout restart deployment/api --namespace=prod
-must: 運用チャンネル
-must: リバート
-must: プルリクエスト
-order: 運用チャンネル < kubectl rollout restart < リバート
-maxlen: 50

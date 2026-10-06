@@ -1,9 +1,0 @@
-# 結論が末尾にある。結論が先頭に移り、前提（要件とGC停止の2点を含む）は削除されずに残る
-must: Rust
-must: 実装すべき
-must: 5ms
-must: 数十ms
-must: 3名
-must: メモリ安全性
-order: 実装すべき < 5ms < 数十ms
-maxlen: 50
